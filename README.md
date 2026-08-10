@@ -1,12 +1,22 @@
 # Campus Lost & Found
 
+Kampüs için ortak Lost & Found web uygulaması (Next.js + Supabase).
+
+- **Student 1** (`student1` branch) → Report & Manage: login, item report, my listings, received claims
+- **Student 2** (`student2` branch) → Discover & Claim: browse, search/filter, item detail, claim gönderme, sent claims
+
 ## Kurulum
-1. `.env.example` dosyasını kopyalayıp `.env` olarak kaydedin.
-2. Kendi API key değerlerinizi `.env` içine girin (bu dosya asla commit edilmez).
 
-## Branch yapısı
-- `main` — ortak dosyalar (veri, config, `.env.example`)
-- `student1` — student1'in çalışma branch'i
-- `student2` — student2'nin çalışma branch'i
+```bash
+npm install
+cp .env.example .env.local   # Supabase Project URL + anon key'i doldur
+npm run dev
+```
 
-Değişiklikler `main`'e Pull Request ile birleştirilir.
+`supabase/migrations/` altındaki dosyaları sırasıyla Supabase projesinin SQL Editor'ünde bir kez çalıştırın (tablolar + RLS + storage bucket).
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Branch workflow
+
+Git branch/merge akışı için Group Project Cheat Sheet'i takip edin: her öğrenci kendi branch'inde çalışır, `main`'e doğrudan push yapılmaz, proje bitince PR + review + merge yapılır.

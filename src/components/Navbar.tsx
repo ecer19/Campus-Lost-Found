@@ -32,6 +32,16 @@ export default async function Navbar() {
           <Link href="/report" className="hover:underline">
             Report Item
           </Link>
+          {user && (
+            <>
+              <Link href="/my-listings" className="hover:underline">
+                My Listings
+              </Link>
+              <Link href="/sent-claims" className="hover:underline">
+                Sent Claims
+              </Link>
+            </>
+          )}
 
           {user ? (
             <div className="flex items-center gap-3 border-l border-green-200 pl-4 dark:border-green-900">
