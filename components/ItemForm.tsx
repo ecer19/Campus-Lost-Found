@@ -1,6 +1,13 @@
 "use client";
 
-import { useActionState, useState, type ChangeEvent, type ReactNode } from "react";
+import {
+  useActionState,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { CATEGORIES, type Item } from "@/types/database";
 
 export type ItemFormState = { error?: string };
@@ -17,6 +24,47 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="mb-1 block text-sm font-medium">{label}</span>
       {children}
     </label>
+  );
+}
+
+function CameraIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1-2h6l1 2h2.5A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"
+      />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  );
+}
+
+function GalleryIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <rect x="3.5" y="4.5" width="17" height="15" rx="1.5" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m5 17 4.5-5 3 3L17 10l2.5 3.5"
+      />
+    </svg>
   );
 }
 
@@ -41,6 +89,18 @@ export default function ItemForm({
   const [preview, setPreview] = useState<string | null>(
     item?.image_url ?? null
   );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function openFilePicker(capture?: "environment") {
+    const input = fileInputRef.current;
+    if (!input) return;
+    if (capture) {
+      input.setAttribute("capture", capture);
+    } else {
+      input.removeAttribute("capture");
+    }
+    input.click();
+  }
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -68,8 +128,19 @@ export default function ItemForm({
     setPreview(URL.createObjectURL(file));
   }
 
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    if (mode === "create" && !preview) {
+      event.preventDefault();
+      setImageError("An image is required.");
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form
+      action={formAction}
+      onSubmit={handleFormSubmit}
+      className="flex flex-col gap-5"
+    >
       <input type="hidden" name="type" value={type} />
 
       <div>
@@ -150,15 +221,37 @@ export default function ItemForm({
         />
       </Field>
 
-      <Field label="Photo">
+      <div>
+        <span className="mb-1 block text-sm font-medium">Photo</span>
+
         <input
+          ref={fileInputRef}
           type="file"
           name="image"
           accept="image/jpeg,image/jpg,image/png"
-          required={mode === "create"}
           onChange={handleImageChange}
-          className="block w-full text-sm"
+          className="hidden"
         />
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => openFilePicker("environment")}
+            className="flex items-center gap-2 rounded-md border border-green-200 px-3 py-2 text-sm hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-900/40"
+          >
+            <CameraIcon />
+            Take Photo
+          </button>
+          <button
+            type="button"
+            onClick={() => openFilePicker()}
+            className="flex items-center gap-2 rounded-md border border-green-200 px-3 py-2 text-sm hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-900/40"
+          >
+            <GalleryIcon />
+            Choose File
+          </button>
+        </div>
+
         <p className="mt-1 text-xs text-green-900/50 dark:text-green-100/50">
           JPG or PNG, up to 5MB.
         </p>
@@ -175,7 +268,7 @@ export default function ItemForm({
             className="mt-3 h-32 w-32 rounded-md border border-green-200 object-cover dark:border-green-800"
           />
         )}
-      </Field>
+      </div>
 
       {state.error && (
         <p className="text-sm text-red-600 dark:text-red-400">
